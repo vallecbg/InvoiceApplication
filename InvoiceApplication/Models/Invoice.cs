@@ -1,0 +1,31 @@
+using System.Collections.Generic;
+using System.Linq;
+
+namespace InvoiceApplication.Models;
+
+/// <summary>
+/// Represents an invoice containing multiple items.
+/// </summary>
+public class Invoice<TCurrency> where TCurrency : Currency
+{
+    public List<InvoiceItem<TCurrency>> Items { get; }
+
+    public Invoice()
+    {
+        Items = new List<InvoiceItem<TCurrency>>();
+    }
+
+    public void AddItem(InvoiceItem<TCurrency> item)
+    {
+        Items.Add(item);
+    }
+
+    public SingleCurrencyAmount<TCurrency> GetTotal(TCurrency targetCurrency)
+    {
+        var totalAmount = Items
+            .Select(item => item.GetTotalInSelectedCurrency(targetCurrency))
+            .Sum(amount => amount.Amount);
+
+        return new SingleCurrencyAmount<TCurrency>(totalAmount, targetCurrency);
+    }
+}
