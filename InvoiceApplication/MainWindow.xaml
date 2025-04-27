@@ -34,6 +34,7 @@
 
 
 
+
         <!-- Add Item Section -->
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="10">
             <TextBox x:Name="ItemNameTextBox" Width="150" Margin="0,0,10,0" ToolTip="Item Name"/>

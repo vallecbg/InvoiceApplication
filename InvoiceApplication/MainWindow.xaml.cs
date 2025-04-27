@@ -12,7 +12,6 @@ namespace InvoiceApplication;
 public partial class MainWindow : Window
 {
     private List<Currency> _currencies;
-    private MultiCurrencyAmount _multiCurrencyAmount = new MultiCurrencyAmount();
     private MultiCurrencyInvoice _multiCurrencyInvoice = new MultiCurrencyInvoice();
 
 
@@ -36,6 +35,10 @@ public partial class MainWindow : Window
     private void UpdateAmountsListView()
     {
         var targetCurrency = (Currency)BaseCurrencyComboBox.SelectedItem;
+        OriginalPriceColumn.Header = $"Price";
+        ConvertedPriceColumn.Header = $"Price ({targetCurrency.Code})";
+        TotalColumn.Header = $"Total";
+        TotalConvertedColumn.Header = $"Total ({targetCurrency.Code})";
 
         // Обновяване на списъка с артикули
         InvoiceItemsListView.ItemsSource = null;
