@@ -28,13 +28,21 @@
         <ListView x:Name="InvoiceItemsListView" Grid.Row="1" Margin="10">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="200"/>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="100"/>
                     <GridViewColumn x:Name="OriginalPriceColumn" Header="Price (Original)" DisplayMemberBinding="{Binding OriginalPrice, StringFormat={}{0:F2}}" Width="100"/>
-                    <GridViewColumn x:Name="ConvertedPriceColumn" Header="Price (Converted)" DisplayMemberBinding="{Binding PriceInSelectedCurrency, StringFormat={}{0:F2}}" Width="150"/>
-                    <GridViewColumn Header="Quantity" DisplayMemberBinding="{Binding Quantity}" Width="100"/>
-                    <GridViewColumn x:Name="TotalColumn" Header="Total" DisplayMemberBinding="{Binding Total, StringFormat={}{0:F2}}" Width="150"/>
-                    <GridViewColumn x:Name="VATColumn" Header="VAT" DisplayMemberBinding="{Binding VATAmount, StringFormat={}{0:F2}}" Width="100"/>
+                    <GridViewColumn x:Name="ConvertedPriceColumn" Header="Price (Converted)" DisplayMemberBinding="{Binding PriceInSelectedCurrency, StringFormat={}{0:F2}}" Width="120"/>
+                    <GridViewColumn Header="Quantity" DisplayMemberBinding="{Binding Quantity}" Width="60"/>
+                    <GridViewColumn Header="Discount" DisplayMemberBinding="{Binding Discount}" Width="100"/>
+                    <GridViewColumn x:Name="TotalColumn" Header="Total" DisplayMemberBinding="{Binding Total, StringFormat={}{0:F2}}" Width="80"/>
+                    <GridViewColumn x:Name="VATColumn" Header="VAT" DisplayMemberBinding="{Binding VATAmount, StringFormat={}{0:F2}}" Width="60"/>
                     <GridViewColumn x:Name="TotalWithVATColumn" Header="Total (With VAT)" DisplayMemberBinding="{Binding TotalWithVAT, StringFormat={}{0:F2}}" Width="150"/>
+                    <GridViewColumn Header="Actions" Width="100">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Delete" Click="DeleteItemButton_Click" Tag="{Binding}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

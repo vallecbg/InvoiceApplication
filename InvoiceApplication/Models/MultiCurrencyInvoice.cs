@@ -31,6 +31,23 @@ public class MultiCurrencyInvoice
         invoice.AddItem(item);
     }
 
+    public void RemoveItem<TCurrency>(InvoiceItem<TCurrency> item) where TCurrency : Currency
+    {
+        var currencyCode = item.Price.Currency.Code;
+
+        if (_invoices.ContainsKey(currencyCode))
+        {
+            var invoice = (Invoice<TCurrency>)_invoices[currencyCode];
+            invoice.RemoveItem(item);
+
+            // Ако фактурата е празна, премахваме я от речника
+            if (!invoice.Items.Any())
+            {
+                _invoices.Remove(currencyCode);
+            }
+        }
+    }
+
     /// <summary>
     /// Gets the total amount for all invoices in the specified target currency.
     /// </summary>

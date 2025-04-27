@@ -49,10 +49,12 @@ public partial class MainWindow : Window
         var allItems = _multiCurrencyInvoice.GetAllItems()
             .Select(item => new
             {
-                item.Name,
+                Item = item, // Оригиналният обект
+                Name = item.Name,
                 OriginalPrice = $"{item.Price.Amount:F2} {item.Price.Currency.Code}", // Оригиналната цена с валута
                 PriceInSelectedCurrency = $"{item.GetPriceInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // Конвертираната цена с валута
                 item.Quantity,
+                Discount = $"{item.GetDiscountAmountInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // Отстъпка в конвертираната валута
                 Total = $"{item.GetTotalInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // Тотал в конвертираната валута
                 VATAmount = $"{item.GetVATAmountInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // ДДС в конвертираната валута
                 TotalWithVAT = $"{item.GetTotalWithVATInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}" // Тотал с включен ДДС в конвертираната валута
@@ -67,6 +69,25 @@ public partial class MainWindow : Window
         TotalTextBlock.Text = $"Total: {total.Amount:F2} {targetCurrency.Code}";
         TotalWithVATTextBlock.Text = $"Total (With VAT): {totalWithVAT.Amount:F2} {targetCurrency.Code}";
     }
+
+
+    private void DeleteItemButton_Click(object sender, RoutedEventArgs e)
+    {
+        Button button = (Button)sender;
+        var dataContext = button.DataContext;
+        var item = ((dynamic)dataContext).Item as InvoiceItem<Currency>; // Extract the original item
+
+        if (item != null)
+        {
+            _multiCurrencyInvoice.RemoveItem(item);
+            UpdateAmountsListView();
+        }
+    }
+
+
+
+
+
 
 
 

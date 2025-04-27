@@ -9,19 +9,38 @@ public class InvoiceItem<TCurrency> where TCurrency : Currency
     public SingleCurrencyAmount<TCurrency> Price { get; }
     public int Quantity { get; }
     public decimal VATPercentage { get; }
+    public int DiscountQuantityThreshold { get; } // Минимално количество за отстъпка
+    public decimal DiscountPercentage { get; } // Процент на отстъпка
 
-    public InvoiceItem(string name, SingleCurrencyAmount<TCurrency> price, int quantity, decimal vatPercentage = 20)
+    public InvoiceItem(string name, SingleCurrencyAmount<TCurrency> price, int quantity, decimal vatPercentage = 20, int discountQuantityThreshold = 3, decimal discountPercentage = 5)
     {
         Name = name;
         Price = price;
         Quantity = quantity;
         VATPercentage = vatPercentage;
+        DiscountQuantityThreshold = discountQuantityThreshold;
+        DiscountPercentage = discountPercentage;
     }
 
     /// <summary>
     /// Gets the total amount for this item (Price * Quantity).
     /// </summary>
-    public decimal Total => Price.Amount * Quantity;
+    public decimal Total => Price.Amount * Quantity - DiscountAmount;
+
+    /// <summary>
+    /// Gets the discount amount for this item.
+    /// </summary>
+    public decimal DiscountAmount => Quantity >= DiscountQuantityThreshold ? (Price.Amount * Quantity * (DiscountPercentage / 100)) : 0;
+
+    /// <summary>
+    /// Gets the discount amount in the selected currency.
+    /// </summary>
+    public SingleCurrencyAmount<TTargetCurrency> GetDiscountAmountInSelectedCurrency<TTargetCurrency>(TTargetCurrency targetCurrency)
+        where TTargetCurrency : Currency
+    {
+        var discountInOriginalCurrency = new SingleCurrencyAmount<TCurrency>(DiscountAmount, Price.Currency);
+        return discountInOriginalCurrency.ConvertTo(targetCurrency);
+    }
 
     /// <summary>
     /// Gets the VAT amount for this item.

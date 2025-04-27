@@ -20,6 +20,14 @@ public class Invoice<TCurrency> where TCurrency : Currency
         Items.Add(item);
     }
 
+    /// <summary>
+    /// Removes an item from the invoice.
+    /// </summary>
+    public void RemoveItem(InvoiceItem<TCurrency> item)
+    {
+        Items.Remove(item);
+    }
+
     public SingleCurrencyAmount<TCurrency> GetTotal(TCurrency targetCurrency)
     {
         var totalAmount = Items
