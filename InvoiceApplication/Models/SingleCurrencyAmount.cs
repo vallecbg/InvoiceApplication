@@ -8,6 +8,8 @@ public class SingleCurrencyAmount<TCurrency> where TCurrency : Currency
     public decimal Amount { get; }
     public TCurrency Currency { get; }
 
+    // Празен конструктор за EF
+    private SingleCurrencyAmount() { }
     public SingleCurrencyAmount(decimal amount, TCurrency currency)
     {
         Amount = amount;

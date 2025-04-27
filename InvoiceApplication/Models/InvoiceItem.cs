@@ -11,6 +11,9 @@ public class InvoiceItem<TCurrency> where TCurrency : Currency
     public decimal VATPercentage { get; }
     public int DiscountQuantityThreshold { get; } // Минимално количество за отстъпка
     public decimal DiscountPercentage { get; } // Процент на отстъпка
+    
+    // Параметърless конструктор за EF Core
+    private InvoiceItem() { }
 
     public InvoiceItem(string name, SingleCurrencyAmount<TCurrency> price, int quantity, decimal vatPercentage = 20, int discountQuantityThreshold = 3, decimal discountPercentage = 5)
     {

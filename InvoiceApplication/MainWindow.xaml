@@ -13,10 +13,16 @@
         </Grid.RowDefinitions>
 
         <!-- Currency Selection -->
-        <StackPanel Orientation="Horizontal" Margin="10">
+        <StackPanel Orientation="Horizontal" Margin="15">
             <TextBlock Text="Select Base Currency:" VerticalAlignment="Center" Margin="0,0,10,0"/>
             <ComboBox x:Name="BaseCurrencyComboBox" Width="150" DisplayMemberPath="Code" SelectionChanged="BaseCurrencyComboBox_SelectionChanged"/>
+
+            <TextBlock Text="Select Client:" VerticalAlignment="Center" Margin="10,0,10,0"/>
+            <ComboBox x:Name="ClientComboBox" Width="100" DisplayMemberPath="Name" SelectionChanged="ClientComboBox_SelectionChanged"/>
+
         </StackPanel>
+
+
 
         <!-- Total Section (Top Right) -->
         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10">
@@ -52,11 +58,21 @@
 
         <!-- Add Item Section -->
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="10">
-            <TextBox x:Name="ItemNameTextBox" Width="150" Margin="0,0,10,0" ToolTip="Item Name"/>
-            <TextBox x:Name="ItemPriceTextBox" Width="100" Margin="0,0,10,0" ToolTip="Price"/>
-            <TextBox x:Name="ItemQuantityTextBox" Width="100" Margin="0,0,10,0" ToolTip="Quantity"/>
+            <ComboBox x:Name="InvoiceItemComboBox" 
+              DisplayMemberPath="Name" 
+              Width="200"
+              IsEditable="True" 
+              Text="Choose product..." />
+            <TextBlock Text="Quantity:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+
+            <TextBox x:Name="ItemQuantityTextBox" Width="100" Margin="0,0,10,0" ToolTip="Quantity" />
+            <TextBlock Text="Currency:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+
             <ComboBox x:Name="ItemCurrencyComboBox" Width="100" DisplayMemberPath="Code" Margin="0,0,10,0" ToolTip="Select Currency"/>
-            <Button Content="Add Item" Click="AddItemButton_Click"/>
+            <Button Content="Add Item" Click="AddItemButton_Click" Width="100" />
+            <Button Content="Manage Products" Click="OpenProductManagementWindow_Click" Width="120" Margin="10,0,0,0"/>
+
+
         </StackPanel>
 
         

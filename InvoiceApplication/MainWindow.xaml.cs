@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using InvoiceApplication.Database;
 using InvoiceApplication.Models;
 
 namespace InvoiceApplication;
@@ -11,19 +12,31 @@ namespace InvoiceApplication;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private readonly ApplicationDbContext _dbContext;
     private List<Currency> _currencies;
     private MultiCurrencyInvoice _multiCurrencyInvoice = new MultiCurrencyInvoice();
 
 
-    public MainWindow()
+    public MainWindow(ApplicationDbContext dbContext)
     {
         InitializeComponent();
+        _dbContext = dbContext;
         LoadCurrencies();
+        LoadInvoiceItems();
+        LoadClients();
     }
+
+    private void LoadInvoiceItems()
+    {
+        var items = _dbContext.GetAllInvoiceItems();
+        InvoiceItemComboBox.ItemsSource = items;
+    }
+
 
     private void LoadCurrencies()
     {
-        _currencies = CurrencyInitializer.GetDefaultCurrencies();
+        // Зареждане на валутите от базата данни
+        _currencies = _dbContext.Currencies.ToList();
         BaseCurrencyComboBox.ItemsSource = _currencies;
         BaseCurrencyComboBox.SelectedIndex = 0; // Select the first currency by default
 
@@ -46,7 +59,8 @@ public partial class MainWindow : Window
         // Обновяване на списъка с артикули
         InvoiceItemsListView.ItemsSource = null;
 
-        var allItems = _multiCurrencyInvoice.GetAllItems()
+        // Вземане само на избраните артикули
+        var selectedItems = _multiCurrencyInvoice.GetAllItems()
             .Select(item => new
             {
                 Item = item, // Оригиналният обект
@@ -61,7 +75,7 @@ public partial class MainWindow : Window
             })
             .ToList();
 
-        InvoiceItemsListView.ItemsSource = allItems;
+        InvoiceItemsListView.ItemsSource = selectedItems;
 
         // Изчисляване на общата сума
         var total = _multiCurrencyInvoice.GetTotal(targetCurrency);
@@ -84,15 +98,6 @@ public partial class MainWindow : Window
         }
     }
 
-
-
-
-
-
-
-
-
-
     private void BaseCurrencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         UpdateAmountsListView();
@@ -100,32 +105,61 @@ public partial class MainWindow : Window
 
     private void AddItemButton_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(ItemNameTextBox.Text) ||
-            !decimal.TryParse(ItemPriceTextBox.Text, out var price) ||
-            !int.TryParse(ItemQuantityTextBox.Text, out var quantity) ||
-            quantity <= 0 ||
-            ItemCurrencyComboBox.SelectedItem == null)
+
+        if (InvoiceItemComboBox.SelectedItem is InvoiceItem<Currency> selectedItem &&
+        int.TryParse(ItemQuantityTextBox.Text, out var quantity) &&
+        quantity > 0)
         {
-            MessageBox.Show("Please enter valid item details.");
-            return;
+            // Актуализиране на количеството на избрания артикул
+            var updatedItem = new InvoiceItem<Currency>(
+                selectedItem.Name,
+                selectedItem.Price, // Използваме оригиналната цена
+                quantity,           // Новото количество
+                selectedItem.VATPercentage,
+                selectedItem.DiscountQuantityThreshold,
+                selectedItem.DiscountPercentage
+            );
+
+            // Добавяне на артикула към фактурата
+            _multiCurrencyInvoice.AddItem(updatedItem);
+
+            // Обновяване на визуализацията
+            UpdateAmountsListView();
+
+
+            ItemQuantityTextBox.Clear();
+            InvoiceItemComboBox.SelectedIndex = -1; // Нулиране на избора
+            InvoiceItemComboBox.Text = "Choose product..."; // Връщане на placeholder текста
         }
+        else
+        {
+            MessageBox.Show("Please select a valid item and enter a valid quantity.");
+        }
+    }
 
-        var itemCurrency = (Currency)ItemCurrencyComboBox.SelectedItem;
+    private void OpenProductManagementWindow_Click(object sender, RoutedEventArgs e)
+    {
+        var productManagementWindow = new ProductManagementWindow(_dbContext)
+        {
+            OnProductAdded = LoadInvoiceItems // Callback за обновяване на продуктите
+        };
+        productManagementWindow.ShowDialog();
+    }
+    private void LoadClients()
+    {
+        // Зареждане на клиентите от базата данни
+        var clients = _dbContext.Clients.ToList();
+        ClientComboBox.ItemsSource = clients;
+        ClientComboBox.SelectedIndex = 0; // Избиране на първия клиент по подразбиране
+    }
 
-        // Създаване на нов артикул с избраната валута
-        var item = new InvoiceItem<Currency>(ItemNameTextBox.Text, new SingleCurrencyAmount<Currency>(price, itemCurrency), quantity);
-
-        // Добавяне на артикула към MultiCurrencyInvoice
-        _multiCurrencyInvoice.AddItem(item);
-
-        // Обновяване на визуализацията
-        UpdateAmountsListView();
-
-        // Изчистване на текстовите полета
-        ItemNameTextBox.Clear();
-        ItemPriceTextBox.Clear();
-        ItemQuantityTextBox.Clear();
-        ItemCurrencyComboBox.SelectedIndex = 0;
+    private void ClientComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ClientComboBox.SelectedItem is Client selectedClient)
+        {
+            MessageBox.Show($"Selected client: {selectedClient.Name}");
+            // Тук можете да добавите логика за свързване на клиента с фактурата
+        }
     }
 
 
