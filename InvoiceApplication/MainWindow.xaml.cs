@@ -35,10 +35,13 @@ public partial class MainWindow : Window
     private void UpdateAmountsListView()
     {
         var targetCurrency = (Currency)BaseCurrencyComboBox.SelectedItem;
-        OriginalPriceColumn.Header = $"Price";
+
+        // Задаване на заглавията на колоните
+        OriginalPriceColumn.Header = "Price";
         ConvertedPriceColumn.Header = $"Price ({targetCurrency.Code})";
-        TotalColumn.Header = $"Total";
-        TotalConvertedColumn.Header = $"Total ({targetCurrency.Code})";
+        TotalColumn.Header = $"Total ({targetCurrency.Code})";
+        VATColumn.Header = $"VAT ({targetCurrency.Code})";
+        TotalWithVATColumn.Header = $"Total (With VAT) ({targetCurrency.Code})";
 
         // Обновяване на списъка с артикули
         InvoiceItemsListView.ItemsSource = null;
@@ -50,8 +53,9 @@ public partial class MainWindow : Window
                 OriginalPrice = $"{item.Price.Amount:F2} {item.Price.Currency.Code}", // Оригиналната цена с валута
                 PriceInSelectedCurrency = $"{item.GetPriceInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // Конвертираната цена с валута
                 item.Quantity,
-                Total = $"{item.Total:F2} {item.Price.Currency.Code}", // Тотал с оригиналната валута
-                TotalInSelectedCurrency = $"{item.GetTotalInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}" // Тотал в конвертираната валута
+                Total = $"{item.GetTotalInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // Тотал в конвертираната валута
+                VATAmount = $"{item.GetVATAmountInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}", // ДДС в конвертираната валута
+                TotalWithVAT = $"{item.GetTotalWithVATInSelectedCurrency(targetCurrency).Amount:F2} {targetCurrency.Code}" // Тотал с включен ДДС в конвертираната валута
             })
             .ToList();
 
@@ -59,7 +63,9 @@ public partial class MainWindow : Window
 
         // Изчисляване на общата сума
         var total = _multiCurrencyInvoice.GetTotal(targetCurrency);
-        TotalTextBlock.Text = $"{total.Amount:F2} {targetCurrency.Code}";
+        var totalWithVAT = _multiCurrencyInvoice.GetTotalWithVAT(targetCurrency);
+        TotalTextBlock.Text = $"Total: {total.Amount:F2} {targetCurrency.Code}";
+        TotalWithVATTextBlock.Text = $"Total (With VAT): {totalWithVAT.Amount:F2} {targetCurrency.Code}";
     }
 
 

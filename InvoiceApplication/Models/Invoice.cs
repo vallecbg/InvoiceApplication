@@ -28,4 +28,14 @@ public class Invoice<TCurrency> where TCurrency : Currency
 
         return new SingleCurrencyAmount<TCurrency>(totalAmount, targetCurrency);
     }
+
+    public SingleCurrencyAmount<TTargetCurrency> GetTotalWithVATInSelectedCurrency<TTargetCurrency>(TTargetCurrency targetCurrency)
+    where TTargetCurrency : Currency
+    {
+        var totalWithVAT = Items
+            .Select(item => item.GetTotalWithVATInSelectedCurrency(targetCurrency))
+            .Sum(amount => amount.Amount);
+
+        return new SingleCurrencyAmount<TTargetCurrency>(totalWithVAT, targetCurrency);
+    }
 }

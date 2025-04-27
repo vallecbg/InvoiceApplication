@@ -24,7 +24,7 @@ public class MultiCurrencyInvoice
 
         if (!_invoices.ContainsKey(currencyCode))
         {
-            _invoices[currencyCode] = new Invoice<TCurrency>(); // Ensure Invoice<TCurrency> is a valid generic type.
+            _invoices[currencyCode] = new Invoice<TCurrency>();
         }
 
         var invoice = (Invoice<TCurrency>)_invoices[currencyCode];
@@ -49,6 +49,27 @@ public class MultiCurrencyInvoice
         }
 
         return new SingleCurrencyAmount<Currency>(totalAmount, targetCurrency);
+    }
+
+    /// <summary>
+    /// Gets the total amount including VAT for all invoices in the specified target currency.
+    /// </summary>
+    public SingleCurrencyAmount<Currency> GetTotalWithVAT(Currency targetCurrency)
+    {
+        decimal totalWithVAT = 0;
+
+        foreach (var invoice in _invoices.Values)
+        {
+            var invoiceType = invoice.GetType();
+            var method = invoiceType.GetMethod("GetTotalWithVATInSelectedCurrency");
+            var constructedMethod = method.MakeGenericMethod(targetCurrency.GetType());
+            var result = constructedMethod.Invoke(invoice, new object[] { targetCurrency });
+
+            var amountProperty = result.GetType().GetProperty("Amount");
+            totalWithVAT += (decimal)amountProperty.GetValue(result);
+        }
+
+        return new SingleCurrencyAmount<Currency>(totalWithVAT, targetCurrency);
     }
 
     public IEnumerable<InvoiceItem<Currency>> GetAllItems()
