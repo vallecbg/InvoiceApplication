@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using InvoiceApplication.Database;
 using InvoiceApplication.Models;
+using InvoiceApplication.ViewModel;
 
 namespace InvoiceApplication;
 
@@ -15,15 +16,35 @@ public partial class MainWindow : Window
     private readonly ApplicationDbContext _dbContext;
     private List<Currency> _currencies;
     private MultiCurrencyInvoice _multiCurrencyInvoice = new MultiCurrencyInvoice();
+    private MainWindowViewModel _viewModel;
 
 
     public MainWindow(ApplicationDbContext dbContext)
     {
         InitializeComponent();
-        _dbContext = dbContext;
-        LoadCurrencies();
-        LoadInvoiceItems();
-        LoadClients();
+        //_dbContext = dbContext;
+        //LoadCurrencies();
+        //LoadInvoiceItems();
+        //LoadClients();
+        _viewModel = new MainWindowViewModel(dbContext);
+        DataContext = _viewModel;
+    }
+
+    private void AddInvoiceItem_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.AddInvoiceItem();
+    }
+
+    private void DeleteInvoiceItem_Click(object sender, RoutedEventArgs e)
+    {
+        Button button = (Button)sender;
+        var dataContext = button.DataContext;
+        var item = ((dynamic)dataContext).Item as InvoiceItem<Currency>; // Extract the original item
+
+        if (item != null)
+        {
+            _viewModel.DeleteInvoiceItem(item);
+        }
     }
 
     private void LoadInvoiceItems()
@@ -37,17 +58,14 @@ public partial class MainWindow : Window
     {
         // Зареждане на валутите от базата данни
         _currencies = _dbContext.Currencies.ToList();
-        BaseCurrencyComboBox.ItemsSource = _currencies;
-        BaseCurrencyComboBox.SelectedIndex = 0; // Select the first currency by default
-
-        // Set the same currencies for the item currency selection
-        ItemCurrencyComboBox.ItemsSource = _currencies;
-        ItemCurrencyComboBox.SelectedIndex = 0; // Select the first currency by default
+        //BaseCurrencyComboBox.ItemsSource = _currencies;
+        //BaseCurrencyComboBox.SelectedIndex = 0; // Select the first currency by default
     }
 
     private void UpdateAmountsListView()
     {
-        var targetCurrency = (Currency)BaseCurrencyComboBox.SelectedItem;
+        //var targetCurrency = (Currency)BaseCurrencyComboBox.SelectedItem;
+        var targetCurrency = new Currency("asd", "asd", 1m);
 
         // Задаване на заглавията на колоните
         OriginalPriceColumn.Header = "Price";
@@ -80,8 +98,8 @@ public partial class MainWindow : Window
         // Изчисляване на общата сума
         var total = _multiCurrencyInvoice.GetTotal(targetCurrency);
         var totalWithVAT = _multiCurrencyInvoice.GetTotalWithVAT(targetCurrency);
-        TotalTextBlock.Text = $"Total: {total.Amount:F2} {targetCurrency.Code}";
-        TotalWithVATTextBlock.Text = $"Total (With VAT): {totalWithVAT.Amount:F2} {targetCurrency.Code}";
+        //TotalTextBlock.Text = $"Total: {total.Amount:F2} {targetCurrency.Code}";
+       // TotalWithVATTextBlock.Text = $"Total (With VAT): {totalWithVAT.Amount:F2} {targetCurrency.Code}";
     }
 
 
@@ -144,22 +162,6 @@ public partial class MainWindow : Window
             OnProductAdded = LoadInvoiceItems // Callback за обновяване на продуктите
         };
         productManagementWindow.ShowDialog();
-    }
-    private void LoadClients()
-    {
-        // Зареждане на клиентите от базата данни
-        var clients = _dbContext.Clients.ToList();
-        ClientComboBox.ItemsSource = clients;
-        ClientComboBox.SelectedIndex = 0; // Избиране на първия клиент по подразбиране
-    }
-
-    private void ClientComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (ClientComboBox.SelectedItem is Client selectedClient)
-        {
-            MessageBox.Show($"Selected client: {selectedClient.Name}");
-            // Тук можете да добавите логика за свързване на клиента с фактурата
-        }
     }
 
 
