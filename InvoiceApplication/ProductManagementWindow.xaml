@@ -3,9 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InvoiceApplication"
         mc:Ignorable="d"
-        Title="ProductManagementWindow" Height="450" Width="800">
+        xmlns:vm="clr-namespace:InvoiceApplication.ViewModel"
+        Title="Currency Converter" Height="450" Width="1000">
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,7 +24,7 @@
         </StackPanel>
 
         <!-- DataGrid for Viewing Existing Products -->
-        <DataGrid x:Name="ProductsDataGrid" Grid.Row="1" Margin="10" AutoGenerateColumns="False" IsReadOnly="True">
+        <DataGrid x:Name="ProductsDataGrid" ItemsSource="{Binding InvoiceItems}" Grid.Row="1" Margin="10" AutoGenerateColumns="False" IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Price" Binding="{Binding Price.Amount}" Width="*"/>

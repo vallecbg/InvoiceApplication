@@ -24,7 +24,9 @@ public partial class App : Application
             options.UseSqlite("Data Source=InvoiceApp.db"));
 
         // Регистриране на прозореца
-        services.AddSingleton<MainWindow>();
+        services.AddSingleton<MainWindow>(); 
+        services.AddSingleton<ProductManagementWindow>();
+
 
         _serviceProvider = services.BuildServiceProvider();
 
@@ -37,18 +39,5 @@ public partial class App : Application
     {
         _serviceProvider?.Dispose();
         base.OnExit(e);
-    }
-}
-
-public static class CurrencyInitializer
-{
-    public static List<Currency> GetDefaultCurrencies()
-    {
-        return new List<Currency>
-        {
-            new Currency("US Dollar", "USD", 1.0m),
-            new Currency("Euro", "EUR", 0.85m),
-            new Currency("Bulgarian Lev", "BGN", 1.95m)
-        };
     }
 }
