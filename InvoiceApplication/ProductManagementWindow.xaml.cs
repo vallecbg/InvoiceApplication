@@ -33,38 +33,21 @@ public partial class ProductManagementWindow : Window
         _viewModel = new MainWindowViewModel(dbContext);
         DataContext = _viewModel;
     }
-
     private void AddProductButton_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(ProductNameTextBox.Text) ||
-            !decimal.TryParse(ProductPriceTextBox.Text, out var price) ||
-            ProductCurrencyComboBox.SelectedItem is not Currency selectedCurrency)
+    !decimal.TryParse(ProductPriceTextBox.Text, out var price))
         {
             MessageBox.Show("Please enter valid product details.");
             return;
         }
+        _viewModel.AddInvoiceProduct(price);
 
-        // Създаване на нов продукт
-        var newProduct = new InvoiceItem<Currency>(
-            ProductNameTextBox.Text,
-            new SingleCurrencyAmount<Currency>(price, selectedCurrency),
-            quantity: 0 // Количеството е 0, защото това е само дефиниция на продукт
-        );
-
-        // Добавяне в базата данни
-        _dbContext.InvoiceItems.Add(newProduct);
-        _dbContext.SaveChanges();
-
-        // Обновяване на таблицата с продукти
-        //LoadProducts();
-
-        // Извикване на callback за обновяване на продуктите в MainWindow
         OnProductAdded?.Invoke();
 
-        // Изчистване на текстовите полета
         ProductNameTextBox.Clear();
         ProductPriceTextBox.Clear();
-        ProductCurrencyComboBox.SelectedIndex = 0;
+     
     }
     private void DeleteProductButton_Click(object sender, RoutedEventArgs e)
     {
@@ -74,14 +57,7 @@ public partial class ProductManagementWindow : Window
             var result = MessageBox.Show($"Are you sure you want to delete the product '{product.Name}'?", "Confirm Deletion", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
             {
-                // Изтриване на продукта от базата данни
-                _dbContext.InvoiceItems.Remove(product);
-                _dbContext.SaveChanges();
-
-                // Обновяване на таблицата с продукти
-                //LoadProducts();
-
-                // Уведомяване на главния прозорец за промяната
+                _viewModel.RemoveInvoiceProduct(product);
                 OnProductAdded?.Invoke();
             }
         }

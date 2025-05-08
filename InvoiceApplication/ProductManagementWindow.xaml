@@ -17,9 +17,9 @@
 
         <!-- Form for Adding New Product -->
         <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="0">
-            <TextBox x:Name="ProductNameTextBox" Width="150" Margin="0,0,10,0" ToolTip="Product Name"/>
+           <TextBox x:Name="ProductNameTextBox" Text="{Binding SelectedProductName, UpdateSourceTrigger=PropertyChanged}" Width="150" Margin="0,0,10,0" ToolTip="Product Name" />
             <TextBox x:Name="ProductPriceTextBox" Width="100" Margin="0,0,10,0" ToolTip="Price"/>
-            <ComboBox x:Name="ProductCurrencyComboBox" Width="100" Margin="0,0,10,0" DisplayMemberPath="Code"/>
+            <ComboBox ItemsSource="{Binding Currencies}" SelectedItem="{Binding SelectedCurrency}" DisplayMemberPath="Code" />
             <Button Content="Add Product" Click="AddProductButton_Click" Width="100"/>
         </StackPanel>
 

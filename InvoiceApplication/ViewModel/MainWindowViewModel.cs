@@ -86,6 +86,17 @@ namespace InvoiceApplication.ViewModel
             }
         }
 
+        private string _selectedProductName;
+        public string SelectedProductName
+        {
+            get => _selectedProductName;
+            set
+            {
+                _selectedProductName = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<InvoiceItemViewModel> CurrentInvoiceItems { get; set; } = new ObservableCollection<InvoiceItemViewModel>();
 
         private void UpdateCurrentInvoiceItems()
@@ -120,7 +131,36 @@ namespace InvoiceApplication.ViewModel
             }
         }
 
+        public ICommand AddInvoiceProductCommand { get; }
+        public void AddInvoiceProduct(decimal price)
+        {
+            if(SelectedProductName != null)
+            {
+                var newProduct = new InvoiceItem<Currency>(
+                    SelectedProductName,
+                    new SingleCurrencyAmount<Currency>(price, SelectedCurrency),
+                    quantity: 0 // Количеството е 0, защото това е само дефиниция на продукт
+                );
 
+                // Добавяне в базата данни
+                _dbContext.InvoiceItems.Add(newProduct);
+                _dbContext.SaveChanges();
+                InvoiceItems.Add(newProduct);
+                LoadInvoiceItems();
+            }
+        }
+
+        public ICommand RemoveInvoiceProductCommand { get; }
+        public void RemoveInvoiceProduct(InvoiceItem<Currency> item)
+        {
+            if (item != null)
+            {
+                InvoiceItems.Remove(item);
+                _dbContext.InvoiceItems.Remove(item);
+                _dbContext.SaveChanges();
+                LoadInvoiceItems();
+            }
+        }
 
         public ICommand AddInvoiceItemCommand { get; }
         public void AddInvoiceItem()
@@ -174,7 +214,7 @@ namespace InvoiceApplication.ViewModel
             SelectedClient = Clients.FirstOrDefault();
         }
 
-        private void LoadInvoiceItems()
+        public void LoadInvoiceItems()
         {
             InvoiceItems = new ObservableCollection<InvoiceItem<Currency>>(_dbContext.GetAllInvoiceItems());
         }
